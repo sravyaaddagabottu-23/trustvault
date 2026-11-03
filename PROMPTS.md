@@ -33,4 +33,4 @@ git add and git commit first.Because of that,trustvault.db was already tracked a
 
 **Wrong/issue:** In auth.py, the AI used request.client.host directly inside log_event.in permissions.py it guarded the same value with "if request.client else None".because of this inconsistency, auth.py can crash when request.client is None,and the failed login token would not be logged,also,bwhind a proxy like Render,this IP will be the proxy's IP,not the real user's,so the IP in the audit log is not fully trustworthy.
 
-**What I did:** I added a client_ip(request) helper in auth.py that returns None when request.client is missing, and used it in get_current_user and require_role. i will note the proxy-IP limitations in THREATS.md. Commit:
+**What I did:** I added a client_ip(request) helper in auth.py that returns None when request.client is missing, and used it in get_current_user and require_role. i will note the proxy-IP limitations in THREATS.md. Commit:(https://github.com/sravyaaddagabottu-23/trustvault/commit/a0e8cdbe37b16be78e4a84c9db60d12ad3c4947b)
