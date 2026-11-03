@@ -18,6 +18,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
+def client_ip(request: Request):
+    return request.client.host if request.client else None
+
+
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
@@ -45,7 +49,7 @@ def get_current_user(
     # Always re-read the user from the DB: role and is_active are NOT trusted from the token.
     user = db.get(User, user_id)
     if user is None or not user.is_active:
-        log_event(db, user_id, "auth_rejected", allowed=False, ip=request.client.host)
+        log_event(db, user_id, "auth_rejected", allowed=False, ip=client_ip(request))
         raise HTTPException(status_code=401, detail="Invalid token")
     return user
 
@@ -54,7 +58,7 @@ def require_role(*roles: str):
     def checker(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
         if user.role not in roles:
             log_event(db, user.id, "role_denied", allowed=False,
-                      detail=f"needs {roles}", ip=request.client.host)
+                      detail=f"needs {roles}", ip=client_ip(request))
             raise HTTPException(status_code=403, detail="Forbidden")
         return user
     return checker
