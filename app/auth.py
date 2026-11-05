@@ -10,7 +10,12 @@ from sqlalchemy.orm import Session
 from app.models import User, get_db
 from app.audit import log_event
 
-SECRET_KEY = os.environ.get("TRUSTVAULT_SECRET", "dev-only-change-me")
+SECRET_KEY = os.environ.get("TRUSTVAULT_SECRET")
+if not SECRET_KEY:
+    if os.environ.get("TRUSTVAULT_ENV") == "dev":
+        SECRET_KEY = "dev-only-change-me"
+    else:
+        raise RuntimeError("TRUSTVAULT_SECRET is not set. Refusing to start.")
 ALGORITHM = "HS256"
 TOKEN_MINUTES = 60
 

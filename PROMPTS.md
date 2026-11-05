@@ -34,3 +34,13 @@ git add and git commit first.Because of that,trustvault.db was already tracked a
 **Wrong/issue:** In auth.py, the AI used request.client.host directly inside log_event.in permissions.py it guarded the same value with "if request.client else None".because of this inconsistency, auth.py can crash when request.client is None,and the failed login token would not be logged,also,bwhind a proxy like Render,this IP will be the proxy's IP,not the real user's,so the IP in the audit log is not fully trustworthy.
 
 **What I did:** I added a client_ip(request) helper in auth.py that returns None when request.client is missing, and used it in get_current_user and require_role. i will note the proxy-IP limitations in THREATS.md. Commit:(https://github.com/sravyaaddagabottu-23/trustvault/commit/a0e8cdbe37b16be78e4a84c9db60d12ad3c4947b)
+
+## Entry 4 - 2026-11-05
+
+**Asked:** How to deploy to Render and create demo users with passwords taken from environment variables.
+
+**Produced:** A seed_demo_users function that reads SEED_ADMIN_PW, SEED_OWNER_PW and SEED_VIEWER_PW, with a hardcoded default if the variable is missing.
+
+**Wrong / issue:** I typed the variable name as SEED_ADMIN-PW (hyphen) instead of SEED_ADMIN_PW. The deploy still succeeded because the code silently fell back to the default password ChangeMe-Admin1, which is visible in the public code. I only noticed because admin login with my new password gave 401. The AI's fallback hid a misconfiguration and would have left a guessable admin password on a live system.
+
+**What I did:** Fixed the variable name in Render and redeployed. Confirmed the old password now returns 401. Commit: PASTE-LINK

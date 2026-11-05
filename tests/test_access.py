@@ -1,4 +1,5 @@
 import os
+os.environ.setdefault("TRUSTVAULT_ENV", "dev")
 import tempfile
 
 os.environ["TRUSTVAULT_UPLOADS"] = tempfile.mkdtemp()

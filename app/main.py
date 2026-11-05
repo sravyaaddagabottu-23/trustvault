@@ -16,18 +16,43 @@ from app.auth import (client_ip, create_token, get_current_user, hash_password,
 from app.models import AuditLog, Document, Grant, User, get_db, init_db, now
 from app.permissions import authorize
 
+DEV_DEFAULTS = {
+    "SEED_ADMIN_PW": "ChangeMe-Admin1",
+    "SEED_OWNER_PW": "ChangeMe-Owner1",
+    "SEED_VIEWER_PW": "ChangeMe-Viewer1",
+}
+
+
 def seed_demo_users():
-    """Creates demo accounts if missing. Passwords come from env vars on the server."""
+    """Creates demo accounts if missing.
+
+    Passwords MUST come from environment variables. Insecure defaults are allowed
+    only when TRUSTVAULT_ENV=dev (local development).
+    """
     from app.models import SessionLocal
+    dev = os.environ.get("TRUSTVAULT_ENV") == "dev"
+    accounts = [
+        ("admin@trustvault.test", "SEED_ADMIN_PW", "admin"),
+        ("owner@trustvault.test", "SEED_OWNER_PW", "owner"),
+        ("viewer@trustvault.test", "SEED_VIEWER_PW", "viewer"),
+    ]
+    passwords = {}
+    for _, env, _ in accounts:
+        value = os.environ.get(env)
+        if not value:
+            if not dev:
+                raise RuntimeError(
+                    f"{env} is not set. Refusing to start with a default password. "
+                    "Set it, or set TRUSTVAULT_ENV=dev for local development."
+                )
+            value = DEV_DEFAULTS[env]
+        passwords[env] = value
+
     db = SessionLocal()
     try:
-        for email, env, default, role in [
-            ("admin@trustvault.test", "SEED_ADMIN_PW", "ChangeMe-Admin1", "admin"),
-            ("owner@trustvault.test", "SEED_OWNER_PW", "ChangeMe-Owner1", "owner"),
-            ("viewer@trustvault.test", "SEED_VIEWER_PW", "ChangeMe-Viewer1", "viewer"),
-        ]:
+        for email, env, role in accounts:
             if not db.query(User).filter(User.email == email).first():
-                db.add(User(email=email, password_hash=hash_password(os.environ.get(env, default)), role=role))
+                db.add(User(email=email, password_hash=hash_password(passwords[env]), role=role))
         db.commit()
     finally:
         db.close()
