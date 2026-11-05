@@ -16,6 +16,22 @@ from app.auth import (client_ip, create_token, get_current_user, hash_password,
 from app.models import AuditLog, Document, Grant, User, get_db, init_db, now
 from app.permissions import authorize
 
+def seed_demo_users():
+    """Creates demo accounts if missing. Passwords come from env vars on the server."""
+    from app.models import SessionLocal
+    db = SessionLocal()
+    try:
+        for email, env, default, role in [
+            ("admin@trustvault.test", "SEED_ADMIN_PW", "ChangeMe-Admin1", "admin"),
+            ("owner@trustvault.test", "SEED_OWNER_PW", "ChangeMe-Owner1", "owner"),
+            ("viewer@trustvault.test", "SEED_VIEWER_PW", "ChangeMe-Viewer1", "viewer"),
+        ]:
+            if not db.query(User).filter(User.email == email).first():
+                db.add(User(email=email, password_hash=hash_password(os.environ.get(env, default)), role=role))
+        db.commit()
+    finally:
+        db.close()
+
 UPLOAD_DIR = os.environ.get("TRUSTVAULT_UPLOADS", "uploads")
 MAX_BYTES = 5 * 1024 * 1024
 ALLOWED_TYPES = {
@@ -31,6 +47,7 @@ ALLOWED_TYPES = {
 async def lifespan(app: FastAPI):
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     init_db()
+    seed_demo_users()
     yield
 
 
