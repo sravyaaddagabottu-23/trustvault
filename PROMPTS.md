@@ -43,7 +43,7 @@ git add and git commit first.Because of that,trustvault.db was already tracked a
 
 **Wrong / issue:** I typed the variable name as SEED_ADMIN-PW (hyphen) instead of SEED_ADMIN_PW. The deploy still succeeded because the code silently fell back to the default admin password, which is visible in the public code. I noticed only because logging in with my new admin password returned 401. The fallback hid a misconfiguration and would have left a guessable admin password on a live system.
 
-**What I did:** Fixed the variable name in Render and redeployed. Confirmed the old default password now returns 401. Then changed the code so the server refuses to start without the secret and seed passwords unless TRUSTVAULT_ENV=dev, and confirmed the RuntimeError locally. Commit: PASTE-COMMIT-LINK
+**What I did:** Fixed the variable name in Render and redeployed. Confirmed the old default password now returns 401. Then changed the code so the server refuses to start without the secret and seed passwords unless TRUSTVAULT_ENV=dev, and confirmed the RuntimeError locally. Commit: (https://github.com/sravyaaddagabottu-23/trustvault/commit/7d3bd644870df64621188631cf036fae09b119bc)
 
 ## Entry 5 - 2026-11-06
 
@@ -53,4 +53,4 @@ git add and git commit first.Because of that,trustvault.db was already tracked a
 
 **Wrong / issue:** Nothing was wrong that I found in the first run; all 7 passed. But passing tests prove nothing if they would also pass without the check. So I tested the tests: I commented out the authorize() line in the download route.
 
-**What I did:** 4 tests failed (test_stranger_cannot_download, test_admin_cannot_read_content, test_grant_then_revoke_is_immediate, test_denied_attempts_are_audited), so the tests do depend on that line. I restored it and all 7 passed. Commit: PASTE-COMMIT-LINK
+**What I did:** 4 tests failed (test_stranger_cannot_download, test_admin_cannot_read_content, test_grant_then_revoke_is_immediate, test_denied_attempts_are_audited), so the tests do depend on that line. I restored it and all 7 passed. Commit: (https://github.com/sravyaaddagabottu-23/trustvault/commit/78ce48b32c673566c53f33a35d432c675deb8f23)
