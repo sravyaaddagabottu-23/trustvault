@@ -39,8 +39,18 @@ git add and git commit first.Because of that,trustvault.db was already tracked a
 
 **Asked:** How to deploy to Render and create demo users with passwords taken from environment variables.
 
-**Produced:** A seed_demo_users function that reads SEED_ADMIN_PW, SEED_OWNER_PW and SEED_VIEWER_PW, with a hardcoded default if the variable is missing.
+**Produced:** A seed_demo_users function that reads SEED_ADMIN_PW, SEED_OWNER_PW and SEED_VIEWER_PW, with a hardcoded default password if the variable is missing.
 
-**Wrong / issue:** I typed the variable name as SEED_ADMIN-PW (hyphen) instead of SEED_ADMIN_PW. The deploy still succeeded because the code silently fell back to the default password ChangeMe-Admin1, which is visible in the public code. I only noticed because admin login with my new password gave 401. The AI's fallback hid a misconfiguration and would have left a guessable admin password on a live system.
+**Wrong / issue:** I typed the variable name as SEED_ADMIN-PW (hyphen) instead of SEED_ADMIN_PW. The deploy still succeeded because the code silently fell back to the default admin password, which is visible in the public code. I noticed only because logging in with my new admin password returned 401. The fallback hid a misconfiguration and would have left a guessable admin password on a live system.
 
-**What I did:** Fixed the variable name in Render and redeployed. Confirmed the old password now returns 401. Commit: PASTE-LINK
+**What I did:** Fixed the variable name in Render and redeployed. Confirmed the old default password now returns 401. Then changed the code so the server refuses to start without the secret and seed passwords unless TRUSTVAULT_ENV=dev, and confirmed the RuntimeError locally. Commit: PASTE-COMMIT-LINK
+
+## Entry 5 - 2026-11-06
+
+**Asked:** Write tests that prove one user cannot reach another user's documents.
+
+**Produced:** Seven pytest tests in tests/test_access.py.
+
+**Wrong / issue:** Nothing was wrong that I found in the first run; all 7 passed. But passing tests prove nothing if they would also pass without the check. So I tested the tests: I commented out the authorize() line in the download route.
+
+**What I did:** 4 tests failed (test_stranger_cannot_download, test_admin_cannot_read_content, test_grant_then_revoke_is_immediate, test_denied_attempts_are_audited), so the tests do depend on that line. I restored it and all 7 passed. Commit: PASTE-COMMIT-LINK
