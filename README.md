@@ -49,9 +49,12 @@ Every document route calls one function, `can_access` (app/permissions.py), thro
 ## Run locally (Windows PowerShell)
 
 ```
+git clone https://github.com/sravyaaddagabottu-23/trustvault.git
+cd trustvault
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate     (Max/Linux: source  venv/bin/activate and export TRUSTVAULT_ENV=dev.)
 pip install -r requirements.txt
+pytest -q
 $env:TRUSTVAULT_ENV = "dev"
 python seed.py
 uvicorn app.main:app --reload
